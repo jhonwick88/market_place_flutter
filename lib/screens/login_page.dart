@@ -29,13 +29,14 @@ class _LoginPageState extends State<LoginPage> {
     return ProgressHUD(
         child: _uiLogin(context),
         inAsyncCall: isApiCallProcess,
-        color: Colors.green);
+        color: Theme.of(context).primaryColor);
   }
 
   Widget _uiLogin(BuildContext context) {
     return Scaffold(
         key: scaffoldKey,
-        backgroundColor: Colors.white, //Theme.of(context).accentColor,
+        backgroundColor:
+            Theme.of(context).primaryColor, //Theme.of(context).accentColor,
         body: SingleChildScrollView(
           child: Column(
             children: <Widget>[
@@ -132,11 +133,12 @@ class _LoginPageState extends State<LoginPage> {
                           TextButton(
                               style: TextButton.styleFrom(
                                 primary: Colors.white,
-                                backgroundColor: Colors.green,
+                                backgroundColor: Theme.of(context).buttonColor,
                                 side: BorderSide(
-                                    color: Colors.deepOrange, width: 1),
+                                    color: Theme.of(context).accentColor,
+                                    width: 1),
                                 elevation: 20,
-                                minimumSize: Size(100, 50),
+                                minimumSize: Size(300, 50),
                                 shadowColor: Colors.red,
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30)),
@@ -156,11 +158,13 @@ class _LoginPageState extends State<LoginPage> {
                                   if (respon.code == 0) {
                                     var data = UserLogin.fromJson(respon.data);
                                     pref.write(key: "token", value: data.token);
-                                    print("data user token " + data.token);
-                                    Navigator.push(
+                                    //  print("data user token " + data.token);
+                                    //  Navigator.pushReplacement(context, newRoute)
+                                    Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => MyApp()),
+                                          builder: (context) =>
+                                              MyStatefulWidget()),
                                     );
                                   } else {
                                     final snackBar = SnackBar(
@@ -171,14 +175,6 @@ class _LoginPageState extends State<LoginPage> {
                                   }
                                 }
                               },
-                              // onPressed: (){
-                              //   setState(() {
-                              //     if(_formKey.currentState!.validate()){
-                              //       isApiCallProcess = true;
-                              //     }
-                              //
-                              //   });
-                              // },
                               child: Text('Login')),
                           SizedBox(height: 30),
                           Text(response)
