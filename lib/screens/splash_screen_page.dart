@@ -34,12 +34,12 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
         //String? token = await prefs.getString('token');
         String? token = await pref.read(key: "token");
         if (token != "") {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => MyApp()),
+            MaterialPageRoute(builder: (context) => MyStatefulWidget()),
           );
         } else {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => LoginPage()),
           );
