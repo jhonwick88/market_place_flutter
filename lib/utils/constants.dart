@@ -10,6 +10,20 @@ final ButtonStyle raisedButtonStyle = ElevatedButton.styleFrom(
   ),
 );
 
+InputDecoration styleFloatingInputDecoration(
+    String labelText, IconData? iconData, Widget? suffixIcon) {
+  return InputDecoration(
+    contentPadding: EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0),
+    icon: iconData != null ? Icon(iconData) : null,
+    floatingLabelBehavior: FloatingLabelBehavior.auto,
+    labelText: labelText,
+    suffixIcon: suffixIcon,
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(25.0),
+    ),
+  );
+}
+
 const List<String> monthlist = [
   "Januari",
   "Februari",
