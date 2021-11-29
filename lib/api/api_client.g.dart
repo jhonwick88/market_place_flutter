@@ -8,7 +8,7 @@ part of 'api_client.dart';
 
 class _ApiClient implements ApiClient {
   _ApiClient(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'http://10.0.2.2:8000/api';
+    baseUrl ??= 'http://demo.wifipayment.xyz/api';
   }
 
   final Dio _dio;

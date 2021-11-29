@@ -8,14 +8,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:retrofit/retrofit.dart';
 part 'api_client.g.dart';
 
-@RestApi(baseUrl: "http://10.0.2.2:8000/api")
+//@RestApi(baseUrl: "http://10.0.2.2:8000/api")
+@RestApi(baseUrl: "http://demo.wifipayment.xyz/api")
 abstract class ApiClient {
   factory ApiClient(BuildContext context) {
     Dio dio = Dio();
     dio.options = BaseOptions(
         contentType: "application/json",
-        receiveTimeout: 5000,
-        connectTimeout: 5000);
+        receiveTimeout: 10000,
+        connectTimeout: 10000);
     dio.interceptors.add(AppInterceptors(context: context));
     dio.interceptors.add(LoggingInterceptor());
     return _ApiClient(dio);
@@ -70,6 +71,8 @@ class AppInterceptors extends Interceptor {
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) {
     print("koneksi error ");
+    // Navigator.pushReplacement(
+    //     context, MaterialPageRoute(builder: (context) => LoginPage()));
     if (err.response != null) {
       switch (err.type) {
         case DioErrorType.cancel:

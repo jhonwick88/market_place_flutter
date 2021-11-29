@@ -64,7 +64,9 @@ class _ListPaymentState extends State<ListPayment> {
           // ),
           Expanded(
               child: FutureBuilder<BaseModel>(
-            future: ApiClient(context).getPaymentList(params),
+            future: ApiClient(context)
+                .getPaymentList(params)
+                .onError((error, stackTrace) => handleError(error)),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 var listdinamic = snapshot.data!.data;
@@ -317,5 +319,9 @@ class _ListPaymentState extends State<ListPayment> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       // });
     }
+  }
+
+  handleError(Object? error) {
+    print("error juragan");
   }
 }
