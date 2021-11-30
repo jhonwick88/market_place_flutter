@@ -2,7 +2,7 @@
     package="com.pintarmedia.market_place_flutter">
     <uses-permission android:name="android.permission.INTERNET" />
    <application
-        android:label="market_place_flutter"
+        android:label="WifiPay"
         android:icon="@mipmap/ic_launcher">
 
         <activity

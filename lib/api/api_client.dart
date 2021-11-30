@@ -9,7 +9,8 @@ import 'package:retrofit/retrofit.dart';
 part 'api_client.g.dart';
 
 //@RestApi(baseUrl: "http://10.0.2.2:8000/api")
-@RestApi(baseUrl: "http://demo.wifipayment.xyz/api")
+//@RestApi(baseUrl: "http://demo.wifipayment.xyz/api")
+@RestApi(baseUrl: "http://derin.my.id/api")
 abstract class ApiClient {
   factory ApiClient(BuildContext context) {
     Dio dio = Dio();

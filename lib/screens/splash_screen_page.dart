@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:market_place_flutter/mainapp.dart';
 import 'package:market_place_flutter/screens/login_page.dart';
 import 'package:market_place_flutter/utils/shared_preferences_actions.dart';
@@ -21,10 +23,29 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIOverlays([]);
     return Container(
-      color: Colors.blue,
-      child: FlutterLogo(size: MediaQuery.of(context).size.height),
-    );
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [Colors.purple, Colors.blue])
+          ),
+      child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body:  Center(child:Column(
+
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+        Text(
+          'WifiPay',
+          style:
+          TextStyle(fontFamily: 'Lobster', fontSize: 50, color: Colors.white),
+        ),
+          SizedBox(height: 20),
+          Text("By PINTARMEDIA", style: TextStyle(color: Colors.white),)
+      ],),
+    )));
   }
 
   CheckLogin() async {
