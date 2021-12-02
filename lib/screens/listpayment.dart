@@ -46,7 +46,8 @@ class _ListPaymentState extends State<ListPayment> {
     Map<String, dynamic> params = {
       "month": widget.month,
       "year": widget.year,
-      "q": widget.query
+      "q": widget.query,
+      "all":1
     };
     return Scaffold(
       body: Column(
@@ -68,16 +69,22 @@ class _ListPaymentState extends State<ListPayment> {
                 .getPaymentList(params)
                 .onError((error, stackTrace) => handleError(error)),
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                var listdinamic = snapshot.data!.data;
-                List<Customer> pay = (listdinamic['data'] as List)
-                    .map((e) => Customer.fromJson(e))
-                    .toList();
-                return _uiListData(pay);
-              } else {
-                // print(snapshot.error.toString());
+              if (snapshot.connectionState != ConnectionState.done) {
                 return Center(child: CircularProgressIndicator());
               }
+
+              if (snapshot.hasError) {
+                return Center(child: Text("Error"));
+              }
+              if (!snapshot.hasData) {
+                return Center(child: Text("Error"));
+              }
+              var listdinamic = snapshot.data!.data;
+
+              List<Customer> pay = (listdinamic['data'] as List)
+                  .map((e) => Customer.fromJson(e))
+                  .toList();
+              return _uiListData(pay);
             },
           ))
         ],

@@ -8,7 +8,7 @@ part of 'api_client.dart';
 
 class _ApiClient implements ApiClient {
   _ApiClient(this._dio, {this.baseUrl}) {
-    baseUrl ??= 'http://derin.my.id/api';
+    baseUrl ??= 'http://www.wifipayment.xyz/api';
   }
 
   final Dio _dio;
@@ -80,9 +80,9 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<BaseModel> getNoteList() async {
+  Future<BaseModel> getNoteList(page, limit) async {
     const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'page': page, r'limit': limit};
     final _data = <String, dynamic>{};
     final _result = await _dio.fetch<Map<String, dynamic>>(
         _setStreamType<BaseModel>(

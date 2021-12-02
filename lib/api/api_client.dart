@@ -8,16 +8,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:retrofit/retrofit.dart';
 part 'api_client.g.dart';
 
-//@RestApi(baseUrl: "http://10.0.2.2:8000/api")
 //@RestApi(baseUrl: "http://demo.wifipayment.xyz/api")
-@RestApi(baseUrl: "http://derin.my.id/api")
+//@RestApi(baseUrl: "http://10.0.2.2:8000/api")
+@RestApi(baseUrl: "http://www.wifipayment.xyz/api")
 abstract class ApiClient {
   factory ApiClient(BuildContext context) {
     Dio dio = Dio();
     dio.options = BaseOptions(
         contentType: "application/json",
-        receiveTimeout: 10000,
-        connectTimeout: 10000);
+        receiveTimeout: 5000,
+        connectTimeout: 5000);
     dio.interceptors.add(AppInterceptors(context: context));
     dio.interceptors.add(LoggingInterceptor());
     return _ApiClient(dio);
@@ -37,7 +37,8 @@ abstract class ApiClient {
   Future<BaseModel> getPaymentMethodList();
 
   @GET("/note/index")
-  Future<BaseModel> getNoteList();
+  Future<BaseModel> getNoteList(
+      @Query("page") int page, @Query("limit") int limit);
 
   @POST("/note/store")
   Future<BaseModel> postNote(@Queries() Map<String, dynamic> queries);
