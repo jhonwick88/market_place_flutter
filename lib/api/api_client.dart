@@ -10,6 +10,7 @@ part 'api_client.g.dart';
 
 //@RestApi(baseUrl: "http://demo.wifipayment.xyz/api")
 //@RestApi(baseUrl: "http://10.0.2.2:8000/api")
+// @RestApi(baseUrl: "http://derin.my.id/api")
 @RestApi(baseUrl: "http://www.wifipayment.xyz/api")
 abstract class ApiClient {
   factory ApiClient(BuildContext context) {
@@ -39,6 +40,9 @@ abstract class ApiClient {
   @GET("/note/index")
   Future<BaseModel> getNoteList(
       @Query("page") int page, @Query("limit") int limit);
+
+  @GET("/note/index")
+  Future<BaseModel> getNoteSearch(@Queries() Map<String, dynamic> queries);
 
   @POST("/note/store")
   Future<BaseModel> postNote(@Queries() Map<String, dynamic> queries);

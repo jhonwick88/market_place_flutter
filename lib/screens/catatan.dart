@@ -7,7 +7,8 @@ import 'package:market_place_flutter/widgets/loadmore.dart';
 import 'package:market_place_flutter/widgets/striketrough.dart';
 
 class CatatanPage extends StatefulWidget {
-  CatatanPage({Key? key}) : super(key: key);
+  final String query;
+  CatatanPage({Key? key, required String this.query}) : super(key: key);
 
   @override
   _CatatanPageState createState() => _CatatanPageState();
@@ -19,6 +20,7 @@ class _CatatanPageState extends State<CatatanPage> {
   int get count => noteList.length;
   List<Note> noteList = [];
   List<Note> dataShow = [];
+
   //late Future<List<Note>> _future;
   //ScrollController _controller = ScrollController();
   late Note note;
@@ -68,19 +70,64 @@ class _CatatanPageState extends State<CatatanPage> {
     }
   }
 
+  Future<List<Note>> getSearchNotes(Map<String, dynamic> params) async {
+    var res = await ApiClient(context).getNoteSearch(params);
+    if (res.code == 0) {
+      var listData = res.data;
+      List<Note> items = (listData['data'] as List)
+          .map((json) => Note.fromJson(json))
+          .toList();
+      if (items.length > 0) {
+        noteList.clear();
+        setState(() {
+          noteList.addAll(items);
+        });
+      }
+      return noteList;
+    } else {
+      return [];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    Map<String, dynamic> params = {"q": widget.query, "all": 1};
     return Scaffold(
       body: Container(
-        child: RefreshIndicator(
-            child: isLoading
-                ? Center(child: CircularProgressIndicator())
-                : LoadMore(
-                    child: ListView.builder(
-                      itemBuilder: (BuildContext context, int index) {
-                        return count != 0
-                            ? _item(index)
-                            : Center(
+        child: widget.query.length > 0
+            ? RefreshIndicator(
+                child: isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : FutureBuilder(
+                        future: ApiClient(context).getNoteSearch(params),
+                        builder:
+                            (BuildContext context, AsyncSnapshot snapshot) {
+                          if (snapshot.connectionState !=
+                              ConnectionState.done) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+
+                          if (snapshot.hasError) {
+                            return Center(child: Text("Error"));
+                          }
+                          if (!snapshot.hasData) {
+                            return Center(child: Text("Error"));
+                          }
+                          var listdinamic = snapshot.data!.data;
+
+                          List<Note> items = (listdinamic['data'] as List)
+                              .map((e) => Note.fromJson(e))
+                              .toList();
+                          if (items.length > 0) {
+                            //noteList.clear();
+                            return ListView.builder(
+                              itemCount: items.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return _item(items, index);
+                              },
+                            );
+                          } else {
+                            return Center(
                                 //padding: EdgeInsets.all(20),
                                 child: Column(
                                     mainAxisSize: MainAxisSize.max,
@@ -88,18 +135,42 @@ class _CatatanPageState extends State<CatatanPage> {
                                         CrossAxisAlignment.center,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                    Icon(Icons.folder_open),
-                                    Text('Oops Catatan Kosong')
-                                  ]));
-                      },
-                      itemCount: count,
-                    ),
-                    onLoadMore: _loadMore,
-                    whenEmptyLoad: false,
-                    delegate: DefaultLoadMoreDelegate(),
-                    textBuilder: DefaultLoadMoreTextBuilder.english,
-                    isFinish: loadCompleted),
-            onRefresh: _refresh),
+                                  Icon(Icons.hourglass_empty),
+                                  Text('Oops Tidak ditemukan')
+                                ]));
+                          }
+                        },
+                      ),
+                onRefresh: _refresh)
+            : RefreshIndicator(
+                child: isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : LoadMore(
+                        child: ListView.builder(
+                          itemBuilder: (BuildContext context, int index) {
+                            return count != 0
+                                ? _item(noteList, index)
+                                : Center(
+                                    //padding: EdgeInsets.all(20),
+                                    child: Column(
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                        Icon(Icons.folder_open),
+                                        Text('Oops Catatan Kosong')
+                                      ]));
+                          },
+                          itemCount: count,
+                        ),
+                        onLoadMore: _loadMore,
+                        whenEmptyLoad: false,
+                        delegate: DefaultLoadMoreDelegate(),
+                        textBuilder: DefaultLoadMoreTextBuilder.english,
+                        isFinish: loadCompleted),
+                onRefresh: _refresh),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -107,7 +178,7 @@ class _CatatanPageState extends State<CatatanPage> {
               context: context,
               builder: (context) {
                 isEdit = false;
-                return showEditOrAddForm(context, null);
+                return showEditOrAddForm(context, null, null);
               }).then((_) => setState(() {}));
         },
         child: const Icon(Icons.add),
@@ -119,6 +190,7 @@ class _CatatanPageState extends State<CatatanPage> {
     await Future.delayed(Duration(seconds: 0, milliseconds: 2000));
     page = 1;
     loadCompleted = false;
+    widget.query == "";
     noteList.clear();
     await getNotes(page, pageSize);
     isLoading = false;
@@ -131,10 +203,11 @@ class _CatatanPageState extends State<CatatanPage> {
     return true;
   }
 
-  StatefulBuilder showEditOrAddForm(BuildContext context, int? index) {
+  StatefulBuilder showEditOrAddForm(
+      BuildContext context, List<Note>? noteResult, int? index) {
     return StatefulBuilder(
       builder: (BuildContext context, setState) {
-        String textNote = isEdit ? noteList[index!].name : "";
+        String textNote = isEdit ? noteResult![index!].name : "";
         return AlertDialog(
           content: Container(
             height: 200,
@@ -172,9 +245,9 @@ class _CatatanPageState extends State<CatatanPage> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               if (isEdit) {
-                                noteList[index!].name = textNote;
+                                noteResult![index!].name = textNote;
                                 final res = await ApiClient(context).updateNote(
-                                    noteList[index].id, noteList[index]);
+                                    noteResult[index].id, noteResult[index]);
                                 if (res.code == 0) {
                                   Navigator.of(context).pop();
                                 }
@@ -205,7 +278,7 @@ class _CatatanPageState extends State<CatatanPage> {
     );
   }
 
-  Widget _item(int index) {
+  Widget _item(List<Note> noteResult, int index) {
     return Card(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
@@ -213,9 +286,10 @@ class _CatatanPageState extends State<CatatanPage> {
         elevation: 10,
         color: Colors.grey[900],
         child: SwipeActionCell(
-          key: ValueKey(noteList[index]),
+          key: ValueKey(noteResult[index]),
           trailingActions: [
             SwipeAction(
+                performsFirstActionWithFullSwipe: true,
                 nestedAction: SwipeNestedAction(
                   content: Container(
                     decoration: BoxDecoration(
@@ -244,12 +318,12 @@ class _CatatanPageState extends State<CatatanPage> {
                 color: Colors.transparent,
                 content: _getIconButton(Colors.red, Icons.delete),
                 onTap: (handler) async {
-                  final res =
-                      await ApiClient(context).destroyNote(noteList[index].id);
+                  final res = await ApiClient(context)
+                      .destroyNote(noteResult[index].id);
                   if (res.code == 0) {
                     setState(() {
                       print("item deleted " + index.toString());
-                      noteList.removeAt(index);
+                      noteResult.removeAt(index);
                     });
                     //
                   }
@@ -262,33 +336,33 @@ class _CatatanPageState extends State<CatatanPage> {
                       context: context,
                       builder: (context) {
                         isEdit = true;
-                        return showEditOrAddForm(context, index);
+                        return showEditOrAddForm(context, noteResult, index);
                       }).then((_) => setState(() {}));
                 }),
           ],
           child: Padding(
             padding: const EdgeInsets.all(15.0),
-            child: noteList[index].isdone == 1
+            child: noteResult[index].isdone == 1
                 ? GestureDetector(
                     child: StrikeThroughWidget(
-                        child: Text("${index + 1}. ${noteList[index].name}",
+                        child: Text("${index + 1}. ${noteResult[index].name}",
                             style: TextStyle(fontSize: 18))),
                     onTap: () async {
-                      noteList[index].isdone = 0;
+                      noteResult[index].isdone = 0;
                       final res = await ApiClient(context)
-                          .updateNote(noteList[index].id, noteList[index]);
+                          .updateNote(noteResult[index].id, noteResult[index]);
                       if (res.code == 0) {
                         setState(() {});
                       }
                     },
                   )
                 : GestureDetector(
-                    child: Text("${index + 1}. ${noteList[index].name}",
+                    child: Text("${index + 1}. ${noteResult[index].name}",
                         style: TextStyle(fontSize: 18)),
                     onTap: () async {
-                      noteList[index].isdone = 1;
+                      noteResult[index].isdone = 1;
                       final res = await ApiClient(context)
-                          .updateNote(noteList[index].id, noteList[index]);
+                          .updateNote(noteResult[index].id, noteResult[index]);
                       if (res.code == 0) {
                         //print("Make done this");
                         setState(() {});
@@ -298,6 +372,101 @@ class _CatatanPageState extends State<CatatanPage> {
           ),
         ));
   }
+
+  // Widget _item(int index) {
+  //   return Card(
+  //       shape: RoundedRectangleBorder(
+  //           borderRadius: BorderRadius.circular(15.0),
+  //           side: BorderSide(color: Colors.white)),
+  //       elevation: 10,
+  //       color: Colors.grey[900],
+  //       child: SwipeActionCell(
+  //         key: ValueKey(noteList[index]),
+  //         trailingActions: [
+  //           SwipeAction(
+  //               performsFirstActionWithFullSwipe: true,
+  //               nestedAction: SwipeNestedAction(
+  //                 content: Container(
+  //                   decoration: BoxDecoration(
+  //                     borderRadius: BorderRadius.circular(15),
+  //                     color: Colors.red,
+  //                   ),
+  //                   width: 110,
+  //                   height: 30,
+  //                   child: OverflowBox(
+  //                     maxWidth: double.infinity,
+  //                     child: Row(
+  //                       mainAxisAlignment: MainAxisAlignment.center,
+  //                       children: [
+  //                         Icon(
+  //                           Icons.delete,
+  //                           color: Colors.white,
+  //                         ),
+  //                         Text('Hapus ?',
+  //                             style:
+  //                                 TextStyle(color: Colors.white, fontSize: 16)),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ),
+  //               color: Colors.transparent,
+  //               content: _getIconButton(Colors.red, Icons.delete),
+  //               onTap: (handler) async {
+  //                 final res =
+  //                     await ApiClient(context).destroyNote(noteList[index].id);
+  //                 if (res.code == 0) {
+  //                   setState(() {
+  //                     print("item deleted " + index.toString());
+  //                     noteList.removeAt(index);
+  //                   });
+  //                   //
+  //                 }
+  //               }),
+  //           SwipeAction(
+  //               content: _getIconButton(Colors.grey, Icons.edit),
+  //               color: Colors.transparent,
+  //               onTap: (_) {
+  //                 showDialog(
+  //                     context: context,
+  //                     builder: (context) {
+  //                       isEdit = true;
+  //                       return showEditOrAddForm(context, index);
+  //                     }).then((_) => setState(() {}));
+  //               }),
+  //         ],
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(15.0),
+  //           child: noteList[index].isdone == 1
+  //               ? GestureDetector(
+  //                   child: StrikeThroughWidget(
+  //                       child: Text("${index + 1}. ${noteList[index].name}",
+  //                           style: TextStyle(fontSize: 18))),
+  //                   onTap: () async {
+  //                     noteList[index].isdone = 0;
+  //                     final res = await ApiClient(context)
+  //                         .updateNote(noteList[index].id, noteList[index]);
+  //                     if (res.code == 0) {
+  //                       setState(() {});
+  //                     }
+  //                   },
+  //                 )
+  //               : GestureDetector(
+  //                   child: Text("${index + 1}. ${noteList[index].name}",
+  //                       style: TextStyle(fontSize: 18)),
+  //                   onTap: () async {
+  //                     noteList[index].isdone = 1;
+  //                     final res = await ApiClient(context)
+  //                         .updateNote(noteList[index].id, noteList[index]);
+  //                     if (res.code == 0) {
+  //                       //print("Make done this");
+  //                       setState(() {});
+  //                     }
+  //                   },
+  //                 ),
+  //         ),
+  //       ));
+  // }
 
   Widget _getIconButton(color, icon) {
     return Container(

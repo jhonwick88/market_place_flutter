@@ -95,6 +95,22 @@ class _ApiClient implements ApiClient {
   }
 
   @override
+  Future<BaseModel> getNoteSearch(queries) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.addAll(queries);
+    final _data = <String, dynamic>{};
+    final _result = await _dio.fetch<Map<String, dynamic>>(
+        _setStreamType<BaseModel>(
+            Options(method: 'GET', headers: <String, dynamic>{}, extra: _extra)
+                .compose(_dio.options, '/note/index',
+                    queryParameters: queryParameters, data: _data)
+                .copyWith(baseUrl: baseUrl ?? _dio.options.baseUrl)));
+    final value = BaseModel.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
   Future<BaseModel> postNote(queries) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};

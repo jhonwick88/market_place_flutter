@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:market_place_flutter/api/api_client.dart';
 import 'package:market_place_flutter/models/base_model.dart';
@@ -47,7 +45,7 @@ class _ListPaymentState extends State<ListPayment> {
       "month": widget.month,
       "year": widget.year,
       "q": widget.query,
-      "all":1
+      "all": 1
     };
     return Scaffold(
       body: Column(

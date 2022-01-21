@@ -32,6 +32,7 @@ class MyStatefulWidget extends StatefulWidget {
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   int _selectedIndex = 0;
   bool _isVisible = true;
+  bool _isCatatan = false;
   var pref = SharedPreferencesActions();
   final DateTime initialDate = DateTime.now();
   DateTime? selectedDate;
@@ -41,13 +42,15 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
         ListPayment(
             month: selectedDate!.month, year: selectedDate!.year, query: query),
         CalcBeaPasang(),
-        CatatanPage(),
+        CatatanPage(query: query),
       ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      _isVisible = _selectedIndex == 0 ? true : false;
+      query == "";
+      _isVisible = _selectedIndex != 1 ? true : false;
+      _isCatatan = _selectedIndex == 2 ? true : false;
     });
   }
 
@@ -77,7 +80,8 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                       decoration: InputDecoration(
                           icon: Icon(Icons.search),
                           border: InputBorder.none,
-                          hintText: "Cari Pelanggan",
+                          hintText:
+                              _isCatatan ? "Cari Catatan" : "Cari Pelanggan",
                           hintStyle:
                               TextStyle(fontSize: 12, color: Colors.grey),
                           contentPadding: EdgeInsets.symmetric(vertical: 5)),
@@ -91,7 +95,7 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget> {
                 : Text("WifiPay"),
             actions: [
               Visibility(
-                  visible: _isVisible,
+                  visible: _selectedIndex == 0,
                   child: IconButton(
                       onPressed: () {
                         showMonthPicker(
